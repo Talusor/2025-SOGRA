@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -20,6 +21,15 @@ class LoginActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        findViewById<TextView>(R.id.tvRegisterLink).setOnClickListener {
+            val id = findViewById<EditText>(R.id.et_id).text.toString()
+            val pw = findViewById<EditText>(R.id.et_password).text.toString()
+            Log.d("[APP]", String.format("ID : %s", id))
+            Log.d("[APP]", String.format("PW : %s", pw))
+
+            Toast.makeText(this, "미구현 기능 입니다.", Toast.LENGTH_SHORT).show()
         }
 
         findViewById<Button>(R.id.login_button).setOnClickListener {

@@ -11,6 +11,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.UiThread
 import androidx.core.app.ActivityCompat
@@ -60,6 +61,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             isGestureInsetBottomIgnored = true
             state = BottomSheetBehavior.STATE_HIDDEN
         }
+
+        bottomSheet.findViewById<Button>(R.id.detail_button).setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View?) {
+                val self = v as Button
+                if (self.text == "파티 만들기") {
+                    Toast.makeText(baseContext, "파티 만들기 요청", Toast.LENGTH_SHORT).show()
+                } else if (self.text == "파티 참가") {
+                    Toast.makeText(baseContext, "파티 참가 요청", Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
 
         Log.d("[APP]", "state=${bottomSheetBehavior.state}, peek=${bottomSheetBehavior.peekHeight}")
 
@@ -225,6 +237,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             listview.adapter = adapter
         }
     }
+
+
 
     fun setBottomSheetData(name: String, addr: String, desc: String, imgUrl: String) {
         bottomSheet.findViewById<TextView>(R.id.detail_title).text = name

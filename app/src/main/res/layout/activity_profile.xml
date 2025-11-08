@@ -35,6 +35,7 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:scaleType="centerInside"
+            android:src="@android:drawable/ic_menu_manage"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
@@ -42,7 +43,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
-        android:id="@+id/login_container"
+        android:id="@+id/ll_login_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/header_bar"
@@ -58,6 +59,38 @@
             android:textStyle="bold"
             android:layout_marginTop="12dp"
             android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/profile_age"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Age123"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/profile_sex"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SexMale"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/profile_nation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CountryName"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="8dp"/>
+
+
 
 
     </LinearLayout>

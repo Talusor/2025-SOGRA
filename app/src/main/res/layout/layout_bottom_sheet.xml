@@ -57,12 +57,11 @@
                 android:textSize="14sp" />
 
             <!-- 맛집 사진 미리보기. 좌우 스크롤 view -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/photoRecyclerView"
+            <ImageView
+                android:id="@+id/detail_img"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:overScrollMode="never" />
+                android:layout_height="match_parent"
+                android:layout_margin="8dp"/>
 
         </LinearLayout>
 

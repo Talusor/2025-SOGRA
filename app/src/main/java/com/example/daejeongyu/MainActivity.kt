@@ -1,16 +1,20 @@
 package com.example.daejeongyu
 
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.UiThread
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -26,6 +30,8 @@ import okhttp3.Response
 import okio.IOException
 import org.json.JSONArray
 import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 import java.net.URLEncoder
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -151,17 +157,35 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 val json = JSONObject(resp)
                 val address = json.getString("address")
                 val desc = json.getString("description")
+                val imgUrl = json.getString("imageUrl")
                 val recommendationCount = json.getInt("recommendationCount")
                 val visitCount = json.getInt("visitCount")
-                runOnUiThread { setBottomSheetData(name, address, desc) }
+                runOnUiThread { setBottomSheetData(name, address, desc, imgUrl) }
             }
         })
     }
 
-    fun setBottomSheetData(name: String, addr: String, desc: String) {
+    fun setBottomSheetData(name: String, addr: String, desc: String, imgUrl: String) {
         bottomSheet.findViewById<TextView>(R.id.detail_title).text = name
         bottomSheet.findViewById<TextView>(R.id.detail_address).text = addr
         bottomSheet.findViewById<TextView>(R.id.detail_desc).text = desc
+
+        var bitmap: Bitmap? = null
+
+        val imgDownload = Thread() {
+            run {
+                val url = URL(imgUrl)
+                val conn = url.openConnection()
+                conn.doOutput = true
+                conn.connect()
+
+                val istream = conn.inputStream
+                bitmap = BitmapFactory.decodeStream(istream)
+            }
+        }
+        imgDownload.start()
+        imgDownload.join()
+        bottomSheet.findViewById<ImageView>(R.id.detail_img).setImageBitmap(bitmap)
 
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
     }

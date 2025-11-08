@@ -73,7 +73,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tv_portion_people"
+                android:id="@+id/detail_party_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -84,14 +84,15 @@
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/join_button"
+                android:id="@+id/detail_button"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginHorizontal="20dp"
-                android:text="Join" />
+                android:textSize="10sp"
+                android:text="파티 만들기" />
 
             <!-- item_joined_person을 item으로 가짐 -->
-            <androidx.recyclerview.widget.RecyclerView
+            <ListView
                 android:id="@+id/rv_people"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"

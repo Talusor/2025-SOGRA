@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.ListView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.UiThread
@@ -17,7 +18,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.MapFragment
 import com.naver.maps.map.NaverMap
@@ -30,6 +33,7 @@ import okhttp3.Response
 import okio.IOException
 import org.json.JSONArray
 import org.json.JSONObject
+import org.w3c.dom.Text
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
@@ -72,7 +76,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
 
-        findViewById<Button>(R.id.test_button2).setOnClickListener {
+        findViewById<FloatingActionButton>(R.id.btn_refresh).setOnClickListener {
             val loc = locationSource.lastLocation
             if (loc != null) {
                 Log.d("[APP]", String.format("%.5f / %.5f", loc.latitude, loc.longitude))
@@ -141,13 +145,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     fun onMarkerClicked(name: String) {
-        val url = String.format(
+        var url = String.format(
             "landmarks/details/%s",
             URLEncoder.encode(name, "UTF-8").replace("+", "%20")
         )
+
+        Log.d("[APP]", "onMarkerClicked")
+
         HttpClient.getInstance().get(url, object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                Log.e("[APP]", "onMarkerClicked")
                 Log.e("[APP]", e.message ?: "Err")
             }
 
@@ -163,6 +169,61 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 runOnUiThread { setBottomSheetData(name, address, desc, imgUrl) }
             }
         })
+
+        url = String.format(
+            "party/%s/members",
+            URLEncoder.encode(name, "UTF-8").replace("+", "%20")
+        )
+
+        HttpClient.getInstance().get(url, object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Log.e("[APP]", e.message ?: "Err")
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val resp = response.body.string()
+                Log.d("[APP]", "Get Party")
+                Log.d("[APP]", resp)
+                if (!resp.isEmpty()) {
+                    val json = JSONObject(resp)
+                    val maxMembers = json.getInt("maxMembers")
+                    val partyName = json.getString("partyName")
+                    val ownerImage = json.getString("ownerImage")
+                    val ownerName = json.getString("ownerName")
+                    val members = json.getJSONArray("memberNames")
+
+                    val memberList = mutableListOf<Member>()
+                    memberList.add(Member(ownerName, ownerImage))
+
+                    for (i: Int in 0..<members.length()) {
+                        val obj = members.getJSONObject(i)
+                        val name = obj.getString("name")
+                        val img = obj.getString("image")
+                        memberList.add(Member(name, img))
+                    }
+
+                    runOnUiThread { setBottomSheetParty(maxMembers, memberList) }
+                } else {
+                    runOnUiThread { setBottomSheetParty(0, null) }
+                }
+            }
+        })
+    }
+
+    fun setBottomSheetParty(maxMember: Int, members: List<Member>?) {
+        if (members == null) {
+            bottomSheet.findViewById<TextView>(R.id.detail_party_count).text = "파티 없음"
+            bottomSheet.findViewById<TextView>(R.id.detail_button).text = "파티 만들기"
+            val listview = bottomSheet.findViewById<ListView>(R.id.rv_people)
+            listview.adapter = null
+        } else {
+            bottomSheet.findViewById<TextView>(R.id.detail_party_count).text =
+                String.format("%d/%d", members.size, maxMember)
+            bottomSheet.findViewById<TextView>(R.id.detail_button).text = "파티 참가"
+            val listview = bottomSheet.findViewById<ListView>(R.id.rv_people)
+            val adapter = MemberAdapter(this, members)
+            listview.adapter = adapter
+        }
     }
 
     fun setBottomSheetData(name: String, addr: String, desc: String, imgUrl: String) {

@@ -52,7 +52,7 @@
         tools:layout_editor_absoluteY="0dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btn_menu"
+        android:id="@+id/btn_refresh"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -63,40 +63,7 @@
         app:fabCustomSize="36dp"
         app:backgroundTint="@android:color/darker_gray"
         app:tint="@android:color/white"
-        app:srcCompat="@android:drawable/ic_menu_more"
-    />
-
-        <LinearLayout
-            android:id="@+id/ll_bottom_bar"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            app:layout_constraintBottom_toBottomOf="parent">
-
-            <Button
-                android:id="@+id/test_button1"
-                android:layout_width="100dp"
-                android:layout_height="64dp"
-                android:layout_marginHorizontal="20dp"
-                android:layout_weight="1"
-                android:text="Test Button" />
-
-            <Button
-                android:id="@+id/test_button2"
-                android:layout_width="100dp"
-                android:layout_height="64dp"
-                android:layout_marginHorizontal="20dp"
-                android:layout_weight="1"
-                android:text="Test Button" />
-
-            <Button
-                android:id="@+id/test_button3"
-                android:layout_width="100dp"
-                android:layout_height="64dp"
-                android:layout_marginHorizontal="20dp"
-                android:layout_weight="1"
-                android:text="Test Button" />
-        </LinearLayout>
-
+        app:srcCompat="@android:drawable/ic_dialog_map" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <FrameLayout

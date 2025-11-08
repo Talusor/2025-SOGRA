@@ -6,10 +6,13 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.widget.Button
+import androidx.activity.enableEdgeToEdge
 import androidx.annotation.UiThread
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.PackageManagerCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.MapFragment
 import com.naver.maps.map.NaverMap
@@ -27,12 +30,17 @@ import org.json.JSONArray
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var locationSource: FusedLocationSource
     private lateinit var naverMap: NaverMap
-    private val client = OkHttpClient()
     private val markers = mutableMapOf<String, LocMarker>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_activity)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
 
         if (ContextCompat.checkSelfPermission(
                 this,
@@ -52,51 +60,46 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             if (loc != null) {
                 Log.d("[APP]", String.format("%.5f / %.5f", loc.latitude, loc.longitude))
 
-                val req = Request.Builder()
-                    .url(
-                        String.format(
-                            "http://10.0.2.2:8080/landmarks/nearby?x=%f&y=%f",
-                            loc.latitude,
-                            loc.longitude
-                        )
-                    )
-                    .build()
-
-                client.newCall(req).enqueue(object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        Log.d("[APP]", "Failed req")
-                        Log.e("[APP]", e.message ?: "Err")
-                    }
-
-                    override fun onResponse(call: Call, response: Response) {
-                        val resp = response.body.string()
-                        Log.d("[APP]", resp)
-                        val json = JSONArray(resp)
-
-                        for (i: Int in 0..<json.length()) {
-                            val landmark = json.getJSONObject(i)
-                            runOnUiThread {
-                                val name = landmark.getString("name")
-                                val lat = landmark.getDouble("x")
-                                val long = landmark.getDouble("y")
-                                if (markers.containsKey(name)) {
-                                    markers[name]?.setPosition(lat, long)
-                                } else {
-                                    markers.put(
-                                        name,
-                                        LocMarker(
-                                            lat,
-                                            long,
-                                            naverMap,
-                                            name
-                                        )
-                                    )
-                                }
-                            }
+                HttpClient.getInstance().get(
+                    String.format(
+                        "landmarks/nearby?x=%f&y=%f",
+                        loc.latitude,
+                        loc.longitude
+                    ), object : Callback {
+                        override fun onFailure(call: Call, e: IOException) {
+                            Log.d("[APP]", "Failed req")
+                            Log.e("[APP]", e.message ?: "Err")
                         }
 
-                    }
-                })
+                        override fun onResponse(call: Call, response: Response) {
+                            val resp = response.body.string()
+                            Log.d("[APP]", resp)
+                            val json = JSONArray(resp)
+
+                            for (i: Int in 0..<json.length()) {
+                                val landmark = json.getJSONObject(i)
+                                runOnUiThread {
+                                    val name = landmark.getString("name")
+                                    val lat = landmark.getDouble("x")
+                                    val long = landmark.getDouble("y")
+                                    if (markers.containsKey(name)) {
+                                        markers[name]?.setPosition(lat, long)
+                                    } else {
+                                        markers.put(
+                                            name,
+                                            LocMarker(
+                                                lat,
+                                                long,
+                                                naverMap,
+                                                name
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+
+                        }
+                    })
             }
 
         }

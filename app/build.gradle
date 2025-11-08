@@ -20,6 +20,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField "String", "MAP_API_KEY", properties["map_api"]
+        buildConfigField "String", "API_URL", properties["api_url"]
     }
 
     buildTypes {

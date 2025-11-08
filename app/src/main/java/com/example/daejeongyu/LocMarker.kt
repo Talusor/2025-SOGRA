@@ -8,17 +8,21 @@ import com.naver.maps.map.NaverMap
 import com.naver.maps.map.overlay.Marker
 import androidx.core.net.toUri
 
-class LocMarker(var lat: Double, var long: Double, map: NaverMap, name: String) {
+class LocMarker(lat: Double, long: Double, map: NaverMap, name: String) {
     var map: NaverMap? = map
+    var marker: Marker = Marker()
 
     init {
-        val marker = Marker()
-        marker.position = LatLng(this.lat, this.long)
+        marker.position = LatLng(lat, long)
         marker.map = this.map
         marker.captionText = name
         marker.setOnClickListener {
             Log.d("[APP]", String.format("%s is Clicked!", marker.captionText))
             true
         }
+    }
+
+    fun setPosition(lat: Double, long: Double) {
+        this.marker.position = LatLng(lat, long)
     }
 }

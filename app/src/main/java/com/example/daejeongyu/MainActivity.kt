@@ -3,16 +3,17 @@ package com.example.daejeongyu
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
 import android.util.Log
+import android.view.View
 import android.widget.Button
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.UiThread
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.PackageManagerCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.MapFragment
 import com.naver.maps.map.NaverMap
@@ -21,15 +22,17 @@ import com.naver.maps.map.OnMapReadyCallback
 import com.naver.maps.map.util.FusedLocationSource
 import okhttp3.Call
 import okhttp3.Callback
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.Response
 import okio.IOException
 import org.json.JSONArray
+import org.json.JSONObject
+import java.net.URLEncoder
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var locationSource: FusedLocationSource
     private lateinit var naverMap: NaverMap
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+    private lateinit var bottomSheet: View
     private val markers = mutableMapOf<String, LocMarker>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +44,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        bottomSheet = findViewById(R.id.bottom_sheet)
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet).apply {
+            isGestureInsetBottomIgnored = true
+            state = BottomSheetBehavior.STATE_HIDDEN
+        }
+
+        Log.d("[APP]", "state=${bottomSheetBehavior.state}, peek=${bottomSheetBehavior.peekHeight}")
 
         if (ContextCompat.checkSelfPermission(
                 this,
@@ -82,19 +93,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                                     val name = landmark.getString("name")
                                     val lat = landmark.getDouble("x")
                                     val long = landmark.getDouble("y")
-                                    if (markers.containsKey(name)) {
-                                        markers[name]?.setPosition(lat, long)
-                                    } else {
-                                        markers.put(
-                                            name,
-                                            LocMarker(
-                                                lat,
-                                                long,
-                                                naverMap,
-                                                name
-                                            )
-                                        )
-                                    }
+                                    addMarker(name, lat, long)
                                 }
                             }
 
@@ -112,6 +111,59 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         locationSource = FusedLocationSource(this, 100)
+    }
+
+    fun addMarker(name: String, lat: Double, long: Double) {
+        if (markers.containsKey(name)) {
+            markers[name]?.setPosition(lat, long)
+        } else {
+            markers.put(
+                name,
+                LocMarker(
+                    lat,
+                    long,
+                    naverMap,
+                    name,
+                    object : StringCallBack {
+                        override fun onCallback(string: String) {
+                            onMarkerClicked(name)
+                        }
+                    }
+                )
+            )
+        }
+    }
+
+    fun onMarkerClicked(name: String) {
+        val url = String.format(
+            "landmarks/details/%s",
+            URLEncoder.encode(name, "UTF-8").replace("+", "%20")
+        )
+        HttpClient.getInstance().get(url, object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Log.e("[APP]", "onMarkerClicked")
+                Log.e("[APP]", e.message ?: "Err")
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val resp = response.body.string()
+
+                val json = JSONObject(resp)
+                val address = json.getString("address")
+                val desc = json.getString("description")
+                val recommendationCount = json.getInt("recommendationCount")
+                val visitCount = json.getInt("visitCount")
+                runOnUiThread { setBottomSheetData(name, address, desc) }
+            }
+        })
+    }
+
+    fun setBottomSheetData(name: String, addr: String, desc: String) {
+        bottomSheet.findViewById<TextView>(R.id.detail_title).text = name
+        bottomSheet.findViewById<TextView>(R.id.detail_address).text = addr
+        bottomSheet.findViewById<TextView>(R.id.detail_desc).text = desc
+
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
     override fun onRequestPermissionsResult(

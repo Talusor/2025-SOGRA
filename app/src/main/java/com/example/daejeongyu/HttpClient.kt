@@ -11,10 +11,6 @@ import okhttp3.Response
 import okio.IOException
 import org.json.JSONObject
 
-interface BoolCallBack {
-    fun onCallback(boolean: Boolean)
-}
-
 class HttpClient private constructor() {
     companion object {
         private var instance: HttpClient = HttpClient()

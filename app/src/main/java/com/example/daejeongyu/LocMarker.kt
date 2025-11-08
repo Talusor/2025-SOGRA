@@ -1,14 +1,11 @@
 package com.example.daejeongyu
 
-import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.overlay.Marker
-import androidx.core.net.toUri
 
-class LocMarker(lat: Double, long: Double, map: NaverMap, name: String) {
+class LocMarker(lat: Double, long: Double, map: NaverMap, name: String, var callBack: StringCallBack) {
     var map: NaverMap? = map
     var marker: Marker = Marker()
 
@@ -18,11 +15,17 @@ class LocMarker(lat: Double, long: Double, map: NaverMap, name: String) {
         marker.captionText = name
         marker.setOnClickListener {
             Log.d("[APP]", String.format("%s is Clicked!", marker.captionText))
+            callBack.onCallback(name)
             true
         }
     }
 
     fun setPosition(lat: Double, long: Double) {
         this.marker.position = LatLng(lat, long)
+    }
+
+    fun setCallback(callBack: StringCallBack)
+    {
+        this.callBack = callBack
     }
 }

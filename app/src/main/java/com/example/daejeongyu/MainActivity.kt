@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
 
-        findViewById<Button>(R.id.test_button).setOnClickListener {
+        findViewById<Button>(R.id.test_button2).setOnClickListener {
             val loc = locationSource.lastLocation
             if (loc != null) {
                 Log.d("[APP]", String.format("%.5f / %.5f", loc.latitude, loc.longitude))
